@@ -1,2 +1,2 @@
-# Instagram_clone_app
+# Instagram clone app
 Python project
