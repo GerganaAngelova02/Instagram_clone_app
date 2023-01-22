@@ -1,0 +1,24 @@
+# PyCharm files
+.idea/
+*.iml
+*.iws
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Environment-specific files
+.env
+
+# Temporary files
+*.log
+*.pyc
+__pycache__/
+
+# Dependencies
+venv/
+env/
+
+
+
