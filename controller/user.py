@@ -13,9 +13,11 @@ class UserController(object):
         return users
 
     def log_user(self, user):
-        user_id = self.user_repository.get_user_id_by_email(user.email)
-        username = self.user_repository.verify_password(user_id, user.password)
+        username = self.user_repository.log_user(user.email, user.password)
         return username
+
+    def update_user(self, user):
+        self.user_repository.update_user(user)
 
 
 user_repository = UserRepository(db)

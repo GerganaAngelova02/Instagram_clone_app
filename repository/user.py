@@ -6,6 +6,7 @@ from mapper.user import map_user_entity_to_user_sql_alchemy, \
 from model import db
 from model.user import User
 from datetime import datetime
+from flask_login import LoginManager, login_user
 
 
 class UserRepository(object):
@@ -18,19 +19,42 @@ class UserRepository(object):
         self.database.session.commit()
         return map_user_sql_alchemy_to_user_entity(user_db_model)
 
-    def get_user_id_by_email(self, email):
-        user = self.database.session.query(User).filter(User.email == email).first()
-        if user is None:
-            abort(404, "User was not found!")
-        return user.user_id
+    # def get_user_id_by_email(self, email):
+    #     user = self.database.session.query(User).filter(User.email == email).first()
+    #     if user is None:
+    #         abort(404, "User was not found!")
+    #     return user.user_id
+    #
+    # def verify_password(self, user_id, password):
+    #     user = self.database.session.query(User).filter(
+    #         User.user_id == user_id). \
+    #         filter(User.password == password). \
+    #         first()
+    #     if user is None:
+    #         abort(404, "User was not found!")
+    #     return user.username
 
-    def verify_password(self, user_id, password):
-        user = self.database.session.query(User).filter(
-            User.user_id == user_id). \
-            filter(User.password == password). \
-            first()
-        if user is None:
+    def log_user(self, email, password):
+        user = User.query.filter_by(email=email).first()
+        if user and user.password == password:
+            login_user(user)
+            return user.username
+        else:
+            return None
+
+    def update_user(self, user: UserEntity):
+        user_to_check = self.database.session.get(User, user.user_id)
+        if user_to_check is None:
             abort(404, "User was not found!")
-        return user.username
+        self.database.session.query(User). \
+            filter(User.user_id == user.user_id). \
+            update({"username": user.username,
+                    "email": user.email,
+                    "full_name": user.full_name,
+                    "password": user.password,
+                    "bio": user.bio,
+                    "profile_pic": user.profile_pic})
+        self.database.session.commit()
+
 
 user_repository = UserRepository(db)

@@ -1,6 +1,7 @@
 from entity.user import UserEntity
 from form.user_register_form import RegistrationForm
 from form.user_login_form import LoginForm
+from form.user_settings_form import SettingsForm
 from model.user import User
 
 
@@ -14,6 +15,15 @@ def map_user_reg_form_to_user_entity(user: RegistrationForm) -> UserEntity:
 def map_user_login_form_to_user_entity(user: LoginForm) -> UserEntity:
     return UserEntity({'email': user.email.data,
                        'password': user.password.data})
+
+
+def map_user_settings_form_to_user_entity(user: SettingsForm) -> UserEntity:
+    return UserEntity({'email': user.email.data,
+                       'username': user.username.data,
+                       'password': user.password.data,
+                       'full_name': user.full_name.data,
+                       'bio': user.bio.data,
+                       'profile_pic': user.profile_pic.data})
 
 
 def map_user_db_model_to_user_entity(user: User) -> UserEntity:

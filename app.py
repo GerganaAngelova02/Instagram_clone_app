@@ -6,8 +6,6 @@ from flask_cors import CORS
 from model import db
 # from view.user import index, create_user
 from model.user import User
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, current_user, JWTManager
-from flask_jwt_extended import decode_token, get_jwt
 import json
 from http import HTTPStatus
 # from repository.user import find_user_by_email_and_password
@@ -15,11 +13,11 @@ from flask import Response, request, make_response
 from controller.user import user_controller
 from form.user_register_form import RegistrationForm
 from form.user_login_form import LoginForm
+from form.user_settings_form import SettingsForm
 from mapper.user import map_user_reg_form_to_user_entity, \
-    map_user_db_model_to_user_entity, map_user_login_form_to_user_entity
+    map_user_db_model_to_user_entity, map_user_login_form_to_user_entity, map_user_settings_form_to_user_entity
 
-from flask_login import LoginManager
-
+from flask_login import LoginManager, current_user
 
 
 def create_app():
@@ -63,17 +61,6 @@ def create_app():
     login_manager = LoginManager()
     login_manager.init_app(app)
 
-    # @app.route('/login', methods=['POST'])
-    # def login():
-    #     login_form = LoginForm(request.form)
-    #     if not login_form.validate():
-    #         return Response(json.dumps(login_form.errors),
-    #                         status=HTTPStatus.BAD_REQUEST,
-    #                         mimetype='application/json')
-    #     user_entity = map_user_login_form_to_user_entity(login_form)
-    #     response = user_controller.log_user(user_entity)
-    #     return Response(json.dumps(response), status=HTTPStatus.OK)
-
     @login_manager.user_loader
     def load_user(user_id):
         return User.query.get(int(user_id))
@@ -85,14 +72,27 @@ def create_app():
             return Response(json.dumps(login_form.errors),
                             status=HTTPStatus.BAD_REQUEST,
                             mimetype='application/json')
-        user = User.query.filter_by(email=login_form.email.data).first()
-        if user and user.password == login_form.password.data:
-            login_user(user)
-            response = {'status': 'success', 'user': user.username}
+        user = map_user_login_form_to_user_entity(login_form)
+        username = user_controller.log_user(user)
+        if username:
+            response = {'status': 'success', 'user': username}
         else:
             response = {'status': 'fail', 'message': 'Invalid email or password'}
         return Response(json.dumps(response), status=HTTPStatus.OK)
 
+    @app.route('/settings', methods=['POST'])
+    @login_required
+    def settings():
+        settings_form = SettingsForm(request.form)
+        if not settings_form.validate():
+            return Response(json.dumps(settings_form.errors),
+                            status=HTTPStatus.BAD_REQUEST,
+                            mimetype='application/json')
+        user = map_user_settings_form_to_user_entity(settings_form)
+        user.user_id = current_user.user_id
+        user_controller.update_user(user)
+        # return {"id": user.user_id, "bio": user.bio, "pic": user.profile_pic}
+        return Response(status=HTTPStatus.OK)
 
     return app
 
