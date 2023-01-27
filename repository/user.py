@@ -56,5 +56,25 @@ class UserRepository(object):
                     "profile_pic": user.profile_pic})
         self.database.session.commit()
 
+    def delete_user(self, user_id):
+        user = self.database.session.get(User, user_id)
+        if user is None:
+            abort(404, "User was not found!")
+        self.database.session.delete(user)
+        self.database.session.commit()
+        return "Deleted {}".format(map_user_sql_alchemy_to_user_entity(user))
+
+    def get_user(self, user_id):
+        user = self.database.session.get(User, user_id)
+        if user is None:
+            abort(404, "User was not found!")
+        return user
+
+    def get_all_users(self):
+        result = []
+        users = User.query.all()
+        for user in users:
+            result.append(map_user_sql_alchemy_to_user_entity(user))
+        return result
 
 user_repository = UserRepository(db)

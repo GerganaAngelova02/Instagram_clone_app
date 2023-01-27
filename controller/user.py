@@ -9,15 +9,22 @@ class UserController(object):
         self.user_repository = user_repository
 
     def save_user(self, user):
-        users = self.user_repository.save_user(user)
-        return users
+        return self.user_repository.save_user(user)
 
     def log_user(self, user):
-        username = self.user_repository.log_user(user.email, user.password)
-        return username
+        return self.user_repository.log_user(user.email, user.password)
 
     def update_user(self, user):
         self.user_repository.update_user(user)
+
+    def delete_user(self, user_id):
+        return self.user_repository.delete_user(user_id)
+
+    def get_user(self,user_id):
+        return self.user_repository.get_user(user_id)
+
+    def get_all_users(self):
+        return self.user_repository.get_all_users()
 
 
 user_repository = UserRepository(db)

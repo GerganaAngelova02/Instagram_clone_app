@@ -1,4 +1,6 @@
 from datetime import timedelta
+
+import flask
 from flask_login import LoginManager, login_user, logout_user, login_required
 from flask import Flask, jsonify, render_template
 import os
@@ -93,6 +95,32 @@ def create_app():
         user_controller.update_user(user)
         # return {"id": user.user_id, "bio": user.bio, "pic": user.profile_pic}
         return Response(status=HTTPStatus.OK)
+
+    @app.route('/logout')
+    @login_required
+    def logout():
+        logout_user()
+        return Response(json.dumps("You have logged out"), status=HTTPStatus.OK)
+
+    @app.route('/user', methods=['GET'])
+    @login_required
+    def get_user():
+        user = user_controller.get_user(current_user.user_id)
+        user_entity = map_user_db_model_to_user_entity(user)
+        return flask.jsonify({"username": user_entity.username,
+                              "email": user_entity.email,
+                              "full_name": user_entity.full_name,
+                              "bio": user_entity.bio,
+                              "profile_pic": user_entity.profile_pic})
+
+    @app.route('/users', methods=['GET'])
+    def get_all_users():
+        return flask.jsonify(user_controller.get_all_users())
+
+    @app.route('/user/delete', methods=['DELETE'])
+    @login_required
+    def delete_user():
+        return user_controller.delete_user(current_user.user_id)
 
     return app
 
