@@ -1,21 +1,26 @@
-from datetime import timedelta
-
 import flask
 from flask_login import LoginManager, login_user, logout_user, login_required
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, url_for
 import os
 from flask_cors import CORS
+from os.path import join, dirname, realpath
+
+from flask_wtf import CSRFProtect
+from werkzeug.utils import secure_filename
+
 from model import db
-# from view.user import index, create_user
 from model.user import User
 import json
 from http import HTTPStatus
 # from repository.user import find_user_by_email_and_password
 from flask import Response, request, make_response
 from controller.user import user_controller
+from controller.post import post_controller
 from form.user_register_form import RegistrationForm
 from form.user_login_form import LoginForm
 from form.user_settings_form import SettingsForm
+from form.post_form import PostForm
+from entity.post import PostEntity
 from mapper.user import map_user_reg_form_to_user_entity, \
     map_user_db_model_to_user_entity, map_user_login_form_to_user_entity, map_user_settings_form_to_user_entity
 
@@ -23,7 +28,7 @@ from flask_login import LoginManager, current_user
 
 
 def create_app():
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder="static")
     login_manager = LoginManager()
     login_manager.init_app(app)
     app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
@@ -46,8 +51,7 @@ def create_app():
 
     @app.route('/')
     def index():
-        # return render_template("index.html")
-        return "DIDO"
+        return "GerriGram"
 
     @app.route('/register', methods=['POST'])
     def create_user():
@@ -121,6 +125,41 @@ def create_app():
     @login_required
     def delete_user():
         return user_controller.delete_user(current_user.user_id)
+
+    app.config["UPLOAD_FOLDER"] = join(dirname(realpath(__file__)), "static/uploads")
+
+    app.config["MAX_CONTENT_LENGTH"] = 1000 * 1024 * 1024  # 1000mb
+
+    app.config['WTF_CSRF_ENABLED'] = False
+    csrf = CSRFProtect(app)
+
+    @app.route('/upload', methods=['GET', 'POST'])
+    @login_required
+    def create_post():
+        form = PostForm(request.form)
+        if not form.validate():
+            return Response(json.dumps(form.errors),
+                            status=HTTPStatus.BAD_REQUEST,
+                            mimetype='application/json')
+
+        allowed_extensions = {'.jpg', '.jpeg', '.png', '.heic', '.heif', '.bmp'}
+
+        content = request.files['content']
+        file_ext = os.path.splitext(content.filename)[1].lower()
+        if file_ext not in allowed_extensions:
+            error_message = "Invalid file type. Only photo files are allowed."
+            return Response(json.dumps(error_message), status=HTTPStatus.BAD_REQUEST)
+
+        content.save(secure_filename(content.filename))
+        file_url = request.host_url + content.filename
+        post_entity = PostEntity({'caption': form.caption.data,
+                                  'content': file_url,
+                                  'author_id': current_user.user_id})
+        response = post_controller.create_post(post_entity)
+        return Response(json.dumps(response), status=HTTPStatus.OK)
+
+    app.config['UPLOAD_FOLDER']
+    app.config['UPLOADED_FILES_DEST'] = '/path/to/uploaded/files'
 
     return app
 

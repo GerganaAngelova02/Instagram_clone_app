@@ -2,6 +2,7 @@ from flask import Flask
 import os
 from model import db
 from model.user import User
+from model.post import Post
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://{}:{}@{}:{}/{}'.format(

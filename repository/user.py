@@ -5,7 +5,7 @@ from mapper.user import map_user_entity_to_user_sql_alchemy, \
     map_user_sql_alchemy_to_user_entity
 from model import db
 from model.user import User
-from datetime import datetime
+
 from flask_login import LoginManager, login_user
 
 
@@ -76,5 +76,6 @@ class UserRepository(object):
         for user in users:
             result.append(map_user_sql_alchemy_to_user_entity(user))
         return result
+
 
 user_repository = UserRepository(db)
