@@ -1,5 +1,4 @@
 from wtforms import Form, StringField, SubmitField, validators, PasswordField, EmailField
-from wtforms.validators import DataRequired
 
 
 class SettingsForm(Form):

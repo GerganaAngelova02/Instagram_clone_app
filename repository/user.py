@@ -5,7 +5,7 @@ from mapper.user import map_user_entity_to_user_sql_alchemy, \
     map_user_sql_alchemy_to_user_entity
 from model import db
 from model.user import User
-
+from model.post import Post
 from flask_login import LoginManager, login_user
 
 
@@ -60,6 +60,7 @@ class UserRepository(object):
         user = self.database.session.get(User, user_id)
         if user is None:
             abort(404, "User was not found!")
+        self.database.session.query(Post).filter(Post.author_id == user_id).delete()
         self.database.session.delete(user)
         self.database.session.commit()
         return "Deleted {}".format(map_user_sql_alchemy_to_user_entity(user))

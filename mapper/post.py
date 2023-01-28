@@ -14,3 +14,10 @@ def map_post_sql_alchemy_to_post_entity(post: Post) -> dict:
                             'caption': post.caption,
                             'content': post.content,
                             'author_id': post.author_id}))
+
+
+def map_post_db_model_to_post_entity(post: Post) -> PostEntity:
+    return PostEntity({'post_id': post.post_id,
+                       'caption': post.caption,
+                       'content': post.content,
+                       'author_id': post.author_id})

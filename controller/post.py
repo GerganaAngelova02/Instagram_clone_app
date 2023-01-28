@@ -11,20 +11,17 @@ class PostController(object):
     def create_post(self, post):
         return self.post_repository.create_post(post)
 
-    # def log_user(self, user):
-    #     return self.user_repository.log_user(user.email, user.password)
-    #
-    # def update_user(self, user):
-    #     self.user_repository.update_user(user)
-    #
-    # def delete_user(self, user_id):
-    #     return self.user_repository.delete_user(user_id)
-    #
-    # def get_user(self,user_id):
-    #     return self.user_repository.get_user(user_id)
-    #
-    # def get_all_users(self):
-    #     return self.user_repository.get_all_users()
+    def get_all_posts(self):
+        return self.post_repository.get_all_posts()
+
+    def get_post(self, post_id):
+        return self.post_repository.get_post(post_id)
+
+    def update_post(self, post):
+        self.post_repository.update_post(post)
+
+    def delete_post(self, post_id, user_id):
+        return self.post_repository.delete_post(post_id, user_id)
 
 
 post_repository = PostRepository(db)

@@ -4,7 +4,7 @@ from flask import Flask, jsonify, render_template, url_for
 import os
 from flask_cors import CORS
 from os.path import join, dirname, realpath
-
+from mapper.post import map_post_db_model_to_post_entity
 from flask_wtf import CSRFProtect
 from werkzeug.utils import secure_filename
 
@@ -157,6 +157,39 @@ def create_app():
                                   'author_id': current_user.user_id})
         response = post_controller.create_post(post_entity)
         return Response(json.dumps(response), status=HTTPStatus.OK)
+
+    @app.route('/posts', methods=['GET'])
+    def get_all_posts():
+        return flask.jsonify(post_controller.get_all_posts())
+
+    @app.route('/post/<post_id>', methods=['GET'])
+    @login_required
+    def get_post(post_id):
+        post = post_controller.get_post(post_id)
+        post_entity = map_post_db_model_to_post_entity(post)
+        return flask.jsonify({"post_id": post_entity.post_id,
+                              "caption": post_entity.caption,
+                              "content": post_entity.content,
+                              "author_id": post_entity.author_id})
+
+    @app.route('/post/<post_id>', methods=['POST'])
+    @login_required
+    def update_post(post_id):
+        form = PostForm(request.form)
+        if not form.validate():
+            return Response(json.dumps(form.errors),
+                            status=HTTPStatus.BAD_REQUEST,
+                            mimetype='application/json')
+        post = PostEntity({'caption': form.caption.data})
+        post.post_id = post_id
+        post_controller.update_post(post)
+        return Response(status=HTTPStatus.OK)
+
+    @app.route('/post/<post_id>', methods=['DELETE'])
+    @login_required
+    def delete_post(post_id):
+        user_id = current_user.user_id
+        return post_controller.delete_post(post_id, user_id)
 
     app.config['UPLOAD_FOLDER']
     app.config['UPLOADED_FILES_DEST'] = '/path/to/uploaded/files'
