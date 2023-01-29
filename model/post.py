@@ -9,6 +9,7 @@ class Post(db.Model):
     # body_html = db.Column(db.Text)
     content = db.Column(db.Text)
     author_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
+    likes = db.relationship('Like', backref='post_like_backref', lazy='dynamic')
 
     def __repr__(self):
         return '<Post %r>' % self.body

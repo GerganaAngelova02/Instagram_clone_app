@@ -16,6 +16,7 @@ from http import HTTPStatus
 from flask import Response, request, make_response
 from controller.user import user_controller
 from controller.post import post_controller
+from controller.like import like_controller
 from form.user_register_form import RegistrationForm
 from form.user_login_form import LoginForm
 from form.user_settings_form import SettingsForm
@@ -190,6 +191,13 @@ def create_app():
     def delete_post(post_id):
         user_id = current_user.user_id
         return post_controller.delete_post(post_id, user_id)
+
+    @app.route('/post/<post_id>/like_unlike', methods=['POST', 'DELETE'])
+    @login_required
+    def like_unlike_post(post_id):
+        return like_controller.like_unlike_post(post_id, current_user)
+
+    @app.route('/')
 
     app.config['UPLOAD_FOLDER']
     app.config['UPLOADED_FILES_DEST'] = '/path/to/uploaded/files'
