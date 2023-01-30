@@ -197,7 +197,15 @@ def create_app():
     def like_unlike_post(post_id):
         return like_controller.like_unlike_post(post_id, current_user)
 
-    @app.route('/')
+    @app.route('/post/<post_id>/likes_count', methods=['GET'])
+    @login_required
+    def likes_count(post_id):
+        return flask.jsonify(like_controller.likes_count(post_id))
+
+    @app.route('/post/<post_id>/likes', methods=['GET'])
+    @login_required
+    def likes(post_id):
+        return flask.jsonify(like_controller.likes(post_id))
 
     app.config['UPLOAD_FOLDER']
     app.config['UPLOADED_FILES_DEST'] = '/path/to/uploaded/files'
