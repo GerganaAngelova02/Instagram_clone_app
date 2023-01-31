@@ -13,9 +13,7 @@ class User(db.Model):
     bio = db.Column(db.Text)
     profile_pic = db.Column(db.Text)
     liked = db.relationship('Like', backref='user_like_backref', lazy='dynamic')
-
-    # comments = db.relationship('Comment', backref='author_backref', lazy='dynamic')
-    # liked = db.relationship('PostLike', backref='user_like_backref', lazy='dynamic')
+    comments = db.relationship('Comment', backref='user_comment_backref', lazy='dynamic')
 
     # sending follower in the first column of table
     # keeps the record/list of users which current user is following to

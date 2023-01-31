@@ -3,6 +3,8 @@ import os
 from model import db
 from model.user import User
 from model.post import Post
+from model.like import Like
+from model.comment import Comment
 
 
 app = Flask(__name__)

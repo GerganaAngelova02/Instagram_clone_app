@@ -7,7 +7,7 @@ from os.path import join, dirname, realpath
 from mapper.post import map_post_db_model_to_post_entity
 from flask_wtf import CSRFProtect
 from werkzeug.utils import secure_filename
-
+from form.comment import CommentForm
 from model import db
 from model.user import User
 import json
@@ -24,9 +24,9 @@ from form.post_form import PostForm
 from entity.post import PostEntity
 from mapper.user import map_user_reg_form_to_user_entity, \
     map_user_db_model_to_user_entity, map_user_login_form_to_user_entity, map_user_settings_form_to_user_entity
-
+from mapper.comment import map_comment_post_form_to_comment_entity
 from flask_login import LoginManager, current_user
-
+from controller.comment import comment_controller
 
 def create_app():
     app = Flask(__name__, static_folder="static")
@@ -206,6 +206,26 @@ def create_app():
     @login_required
     def likes(post_id):
         return flask.jsonify(like_controller.likes(post_id))
+
+    @app.route('/post/<post_id>/comment', methods=['POST'])
+    @login_required
+    def create_comment(post_id):
+        form = CommentForm(request.form)
+        if not form.validate():
+            return Response(json.dumps(form.errors),
+                            status=HTTPStatus.BAD_REQUEST,
+                            mimetype='application/json')
+
+        comment = map_comment_post_form_to_comment_entity(form)
+        comment.user_id = current_user.user_id
+        comment.post_id = post_id
+        response = comment_controller.create_comment(comment)
+        return Response(json.dumps(response), status=HTTPStatus.OK)
+
+    @app.route('/post/<post_id>/comments', methods=['GET'])
+    @login_required
+    def get_comments(post_id):
+        return flask.jsonify(comment_controller.get_comments(post_id))
 
     app.config['UPLOAD_FOLDER']
     app.config['UPLOADED_FILES_DEST'] = '/path/to/uploaded/files'

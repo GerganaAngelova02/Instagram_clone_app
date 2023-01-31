@@ -4,6 +4,6 @@ from wtforms import StringField, SubmitField, validators
 
 
 class PostForm(FlaskForm):
-    content = FileField('Photo')
-    caption = StringField('Caption')
+    content = FileField('Photo', [validators.InputRequired()])
+    caption = StringField('Caption', [validators.InputRequired()])
     submit = SubmitField("Upload")
