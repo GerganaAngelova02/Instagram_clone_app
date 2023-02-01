@@ -19,3 +19,10 @@ def map_comment_sql_alchemy_to_comment(comment: Comment) -> dict:
                                'comment': comment.comment,
                                'user_id': comment.user_id,
                                'post_id': comment.post_id}))
+
+
+def map_comment_db_model_to_comment_entity(comment: Comment) -> CommentEntity:
+    return CommentEntity({'id': comment.id,
+                          'comment': comment.comment,
+                          'user_id': comment.user_id,
+                          'post_id': comment.post_id})

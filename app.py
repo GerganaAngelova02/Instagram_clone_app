@@ -24,9 +24,10 @@ from form.post_form import PostForm
 from entity.post import PostEntity
 from mapper.user import map_user_reg_form_to_user_entity, \
     map_user_db_model_to_user_entity, map_user_login_form_to_user_entity, map_user_settings_form_to_user_entity
-from mapper.comment import map_comment_post_form_to_comment_entity
+from mapper.comment import map_comment_post_form_to_comment_entity, map_comment_db_model_to_comment_entity
 from flask_login import LoginManager, current_user
 from controller.comment import comment_controller
+
 
 def create_app():
     app = Flask(__name__, static_folder="static")
@@ -226,6 +227,33 @@ def create_app():
     @login_required
     def get_comments(post_id):
         return flask.jsonify(comment_controller.get_comments(post_id))
+
+    @app.route('/post/<post_id>/comment/<com_id>', methods=['GET'])
+    @login_required
+    def get_comment(post_id, com_id):
+        comment_to_get = comment_controller.get_comment(post_id, com_id)
+        comment = map_comment_db_model_to_comment_entity(comment_to_get)
+        return flask.jsonify(comment.to_primitive())
+
+    @app.route('/post/<post_id>/comment/<com_id>', methods=['DELETE'])
+    @login_required
+    def delete_comment(post_id, com_id):
+        comment_controller.delete_comment(post_id, com_id, current_user.user_id)
+        return Response(status=HTTPStatus.OK)
+
+    @app.route('/post/<post_id>/comment/<com_id>', methods=['POST'])
+    @login_required
+    def update_comment(post_id, com_id):
+        form = CommentForm(request.form)
+        if not form.validate():
+            return Response(json.dumps(form.errors),
+                            status=HTTPStatus.BAD_REQUEST,
+                            mimetype='application/json')
+        comment = map_comment_post_form_to_comment_entity(form)
+        comment.id = com_id
+        comment.post_id = post_id
+        comment_controller.update_comment(comment, current_user.user_id)
+        return Response(status=HTTPStatus.OK)
 
     app.config['UPLOAD_FOLDER']
     app.config['UPLOADED_FILES_DEST'] = '/path/to/uploaded/files'
