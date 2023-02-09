@@ -20,11 +20,14 @@ class UserController(object):
     def delete_user(self, user_id):
         return self.user_repository.delete_user(user_id)
 
-    def get_user(self,user_id):
+    def get_user(self, user_id):
         return self.user_repository.get_user(user_id)
 
     def get_all_users(self):
         return self.user_repository.get_all_users()
+
+    def get_users_by_username(self, username):
+        return self.user_repository.get_user_by_username(username)
 
 
 user_repository = UserRepository(db)

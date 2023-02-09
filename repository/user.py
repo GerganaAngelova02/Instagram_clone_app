@@ -78,5 +78,11 @@ class UserRepository(object):
             result.append(map_user_sql_alchemy_to_user_entity(user))
         return result
 
+    def get_user_by_username(self, username):
+        user = User.query.filter_by(username=username).first()
+        if user is None:
+            abort(404, "User was not found!")
+        return user
+
 
 user_repository = UserRepository(db)

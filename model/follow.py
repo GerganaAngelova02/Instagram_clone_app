@@ -20,5 +20,4 @@ class Follow(db.Model):
     following_to = db.Column(
         db.Integer, db.ForeignKey('users.user_id'), primary_key=True)
 
-    # time when they got followed/started following
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+

@@ -27,6 +27,7 @@ from mapper.user import map_user_reg_form_to_user_entity, \
 from mapper.comment import map_comment_post_form_to_comment_entity, map_comment_db_model_to_comment_entity
 from flask_login import LoginManager, current_user
 from controller.comment import comment_controller
+from controller.follow import follow_controller
 
 
 def create_app():
@@ -119,9 +120,22 @@ def create_app():
                               "bio": user_entity.bio,
                               "profile_pic": user_entity.profile_pic})
 
+    @app.route('/<username>', methods=['GET'])
+    @login_required
+    def get_user_by_username(username):
+        user = user_controller.get_users_by_username(username)
+        user_entity = map_user_db_model_to_user_entity(user)
+        return flask.jsonify({"username": user_entity.username,
+                              "email": user_entity.email,
+                              "full_name": user_entity.full_name,
+                              "bio": user_entity.bio,
+                              "profile_pic": user_entity.profile_pic})
+
     @app.route('/users', methods=['GET'])
     def get_all_users():
         return flask.jsonify(user_controller.get_all_users())
+
+
 
     @app.route('/user/delete', methods=['DELETE'])
     @login_required
@@ -254,6 +268,27 @@ def create_app():
         comment.post_id = post_id
         comment_controller.update_comment(comment, current_user.user_id)
         return Response(status=HTTPStatus.OK)
+
+    @app.route('/follow/<username>', methods=['POST'])
+    @login_required
+    def follow_user(username):
+        return flask.jsonify(follow_controller.follow_user(current_user, username))
+
+    @app.route('/unfollow/<username>', methods=['DELETE'])
+    @login_required
+    def unfollow_user(username):
+        return flask.jsonify(follow_controller.unfollow_user(current_user, username))
+
+    @app.route('/<username>/followers', methods=['GET'])
+    @login_required
+    def get_user_followers(username):
+        return flask.jsonify(follow_controller.get_followers_list(username))
+
+    @app.route('/<username>/following', methods=['GET'])
+    @login_required
+    def get_user_following(username):
+        return flask.jsonify(follow_controller.get_following_list(username))
+
 
     app.config['UPLOAD_FOLDER']
     app.config['UPLOADED_FILES_DEST'] = '/path/to/uploaded/files'
