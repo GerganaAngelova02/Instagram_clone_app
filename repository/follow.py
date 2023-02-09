@@ -2,7 +2,7 @@ from flask import abort, jsonify
 from model import db
 from model.follow import Follow
 from model.user import User
-
+from repository.post import post_repository
 from entity.user import UserEntity
 
 
@@ -86,6 +86,21 @@ class FollowRepository(object):
 
     def number_of_following(self, username):
         return len(self.get_following_list(username))
+
+
+    def feed(self, user_id):
+        user = User.query.filter_by(user_id=user_id).first()
+        if user is None:
+            abort(404, "User not found")
+        following_ids = []
+        following = user.following_to_list.all()
+        for each in following:
+            locate_user = User.query.get(each.following_to)
+            following_ids.append(locate_user.user_id)
+        posts = []
+        for user in following_ids:
+            posts.append(post_repository.user_posts(user))
+        return {"feed posts": posts}
 
 
 follow_repository = FollowRepository(db)

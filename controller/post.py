@@ -14,6 +14,9 @@ class PostController(object):
     def get_all_posts(self):
         return self.post_repository.get_all_posts()
 
+    def user_posts(self,user_id):
+        return self.post_repository.user_posts(user_id)
+
     def get_post(self, post_id):
         return self.post_repository.get_post(post_id)
 

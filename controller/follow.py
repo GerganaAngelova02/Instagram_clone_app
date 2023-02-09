@@ -12,11 +12,14 @@ class FollowController(object):
     def unfollow_user(self, cur_user, username):
         return follow_repository.unfollow_user(cur_user, username)
 
-    def get_followers_list(self,username):
+    def get_followers_list(self, username):
         return follow_repository.get_followers_list(username)
 
-    def get_following_list(self,username):
+    def get_following_list(self, username):
         return follow_repository.get_following_list(username)
+
+    def feed(self, user_id):
+        return follow_repository.feed(user_id)
 
 
 follow_repository = FollowRepository(db)

@@ -125,6 +125,7 @@ def create_app():
     def get_user_by_username(username):
         user = user_controller.get_user_by_username(username)
         user_entity = map_user_db_model_to_user_entity(user)
+        posts = post_controller.user_posts(user.user_id)
         return flask.jsonify({"username": user_entity.username,
                               "email": user_entity.email,
                               "full_name": user_entity.full_name,
@@ -132,7 +133,8 @@ def create_app():
                               "profile_pic": user_entity.profile_pic,
                               "followers_count": user_entity.followers_count,
                               "following_count": user_entity.following_count,
-                              "posts_count": user_entity.posts_count})
+                              "posts_count": user_entity.posts_count,
+                              "posts": posts})
 
     @app.route('/users', methods=['GET'])
     @login_required
@@ -180,11 +182,6 @@ def create_app():
     @login_required
     def get_all_posts():
         return flask.jsonify(post_controller.get_all_posts())
-
-    # @app.route('/<username>/posts', methods=['GET'])
-    # @login_required
-    # def get_user_posts(username):
-    #     return flask.jsonify(post_controller.user_posts(username))
 
     @app.route('/post/<post_id>', methods=['GET'])
     @login_required
@@ -296,6 +293,17 @@ def create_app():
     @login_required
     def get_user_following(username):
         return flask.jsonify(follow_controller.get_following_list(username))
+
+    @app.route('/feed', methods=['GET'])
+    @login_required
+    def feed():
+        return flask.jsonify(follow_controller.feed(current_user.user_id))
+
+    @app.route('/explore', methods=['GET'])
+    @login_required
+    def explore():
+        return flask.jsonify(post_controller.get_all_posts())
+
 
     app.config['UPLOAD_FOLDER']
     app.config['UPLOADED_FILES_DEST'] = '/path/to/uploaded/files'
