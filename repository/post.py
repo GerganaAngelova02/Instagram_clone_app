@@ -23,6 +23,16 @@ class PostRepository(object):
             result.append(map_post_sql_alchemy_to_post_entity(post))
         return result
 
+    def user_posts(self, user_id):
+        result = []
+        posts = Post.query.filter_by(author_id=user_id).all()
+        for post in posts:
+            result.append(map_post_sql_alchemy_to_post_entity(post))
+        return result
+
+    def number_of_posts(self, user_id):
+        return len(self.user_posts(user_id))
+
     def get_post(self, post_id):
         post = self.database.session.get(Post, post_id)
         if post is None:

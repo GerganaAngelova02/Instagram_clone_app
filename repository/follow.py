@@ -65,7 +65,10 @@ class FollowRepository(object):
         else:
             abort(405, "not allowed.")
 
-    def get_following_list(self,username):
+    def number_of_followers(self, username):
+        return len(self.get_followers_list(username))
+
+    def get_following_list(self, username):
         user = User.query.filter_by(username=username).first()
 
         if user is None:
@@ -80,3 +83,9 @@ class FollowRepository(object):
             return {"following list": following_data}
         else:
             abort(405, "not allowed.")
+
+    def number_of_following(self, username):
+        return len(self.get_following_list(username))
+
+
+follow_repository = FollowRepository(db)

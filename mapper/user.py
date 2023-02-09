@@ -3,6 +3,8 @@ from form.user_register_form import RegistrationForm
 from form.user_login_form import LoginForm
 from form.user_settings_form import SettingsForm
 from model.user import User
+from repository.follow import follow_repository
+from repository.post import post_repository
 
 
 def map_user_reg_form_to_user_entity(user: RegistrationForm) -> UserEntity:
@@ -33,7 +35,10 @@ def map_user_db_model_to_user_entity(user: User) -> UserEntity:
                        'full_name': user.full_name,
                        'bio': user.bio,
                        'profile_pic': user.profile_pic,
-                       'user_id': user.user_id})
+                       'user_id': user.user_id,
+                       'followers_count': follow_repository.number_of_followers(user.username),
+                       'following_count': follow_repository.number_of_following(user.username),
+                       'posts_count': post_repository.number_of_posts(user.user_id)})
 
 
 def map_user_entity_to_user_sql_alchemy(user: UserEntity) -> User:
