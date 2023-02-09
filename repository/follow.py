@@ -57,10 +57,26 @@ class FollowRepository(object):
 
         followers_data = []
         if user.username == username:
-            my_followers = user.followers_list.all()
-            for each_follower in my_followers:
+            followers = user.followers_list.all()
+            for each_follower in followers:
                 locate_user = User.query.get(each_follower.follower_id)
                 followers_data.append(locate_user.username)
             return {"followers": followers_data}
+        else:
+            abort(405, "not allowed.")
+
+    def get_following_list(self,username):
+        user = User.query.filter_by(username=username).first()
+
+        if user is None:
+            abort(404, "User not found")
+
+        following_data = []
+        if user.username == username:
+            following = user.following_to_list.all()
+            for each in following:
+                locate_user = User.query.get(each.following_to)
+                following_data.append(locate_user.username)
+            return {"following list": following_data}
         else:
             abort(405, "not allowed.")

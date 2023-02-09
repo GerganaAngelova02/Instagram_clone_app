@@ -15,5 +15,9 @@ class FollowController(object):
     def get_followers_list(self,username):
         return follow_repository.get_followers_list(username)
 
+    def get_following_list(self,username):
+        return follow_repository.get_following_list(username)
+
+
 follow_repository = FollowRepository(db)
 follow_controller = FollowController(follow_repository)
