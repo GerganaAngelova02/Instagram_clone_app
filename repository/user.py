@@ -1,4 +1,5 @@
 from flask import abort
+from sqlalchemy import exc
 
 from entity.user import UserEntity
 from mapper.user import map_user_entity_to_user_sql_alchemy, \
@@ -14,10 +15,17 @@ class UserRepository(object):
         self.database = database
 
     def save_user(self, user):
+        user_to_check_username = User.query.filter_by(username=user.username).first()
+        user_to_check_email = User.query.filter_by(email=user.email).first()
+        if user_to_check_username is not None:
+            abort(400, "The username is already taken.")
+        if user_to_check_email is not None:
+            abort(400, "The email is already registered.")
         user_db_model = map_user_entity_to_user_sql_alchemy(user)
         self.database.session.add(user_db_model)
         self.database.session.commit()
         return map_user_sql_alchemy_to_user_entity(user_db_model)
+
 
     # def get_user_id_by_email(self, email):
     #     user = self.database.session.query(User).filter(User.email == email).first()
