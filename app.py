@@ -98,8 +98,8 @@ def create_app():
         user = map_user_settings_form_to_user_entity(settings_form)
         user.user_id = current_user.user_id
         user_controller.update_user(user)
-        # return {"id": user.user_id, "bio": user.bio, "pic": user.profile_pic}
-        return Response(status=HTTPStatus.OK)
+        response = 'Successfully updated profile'
+        return Response(json.dumps(response),status=HTTPStatus.OK)
 
     @app.route('/logout')
     @login_required
