@@ -12,7 +12,6 @@ from model import db
 from model.user import User
 import json
 from http import HTTPStatus
-# from repository.user import find_user_by_email_and_password
 from flask import Response, request, make_response
 from controller.user import user_controller
 from controller.post import post_controller
@@ -31,7 +30,7 @@ from controller.follow import follow_controller
 
 
 def create_app():
-    app = Flask(__name__, static_folder="static")
+    app = Flask(__name__)
     login_manager = LoginManager()
     login_manager.init_app(app)
     app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
@@ -44,13 +43,15 @@ def create_app():
         os.getenv('DB_NAME', 'db')
     )
 
-    db.init_app(app)
+    app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'content')
+    if not os.path.exists(app.config['UPLOAD_FOLDER']):
+        os.mkdir(app.config['UPLOAD_FOLDER'])
+    app.config["MAX_CONTENT_LENGTH"] = 1000 * 1024 * 1024
 
-    #
-    # app.add_url_rule('/', view_func=index)
-    # app.add_url_rule('/register', methods=['POST'], view_func=create_user())
-    #
-    # return app
+    app.config['WTF_CSRF_ENABLED'] = False
+    csrf = CSRFProtect(app)
+
+    db.init_app(app)
 
     @app.route('/')
     def index():
@@ -66,9 +67,6 @@ def create_app():
         user = map_user_reg_form_to_user_entity(reg_form)
         response = user_controller.save_user(user)
         return Response(json.dumps(response), status=HTTPStatus.OK)
-
-    login_manager = LoginManager()
-    login_manager.init_app(app)
 
     @login_manager.user_loader
     def load_user(user_id):
@@ -146,13 +144,6 @@ def create_app():
     def delete_user():
         return user_controller.delete_user(current_user.user_id)
 
-    app.config["UPLOAD_FOLDER"] = join(dirname(realpath(__file__)), "static/uploads")
-
-    app.config["MAX_CONTENT_LENGTH"] = 1000 * 1024 * 1024  # 1000mb
-
-    app.config['WTF_CSRF_ENABLED'] = False
-    csrf = CSRFProtect(app)
-
     @app.route('/upload', methods=['GET', 'POST'])
     @login_required
     def create_post():
@@ -170,7 +161,9 @@ def create_app():
             error_message = "Invalid file type. Only photo files are allowed."
             return Response(json.dumps(error_message), status=HTTPStatus.BAD_REQUEST)
 
-        content.save(secure_filename(content.filename))
+        filename = secure_filename(content.filename)
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        content.save(file_path)
         file_url = request.host_url + content.filename
         post_entity = PostEntity({'caption': form.caption.data,
                                   'content': file_url,
@@ -303,10 +296,6 @@ def create_app():
     @login_required
     def explore():
         return flask.jsonify(post_controller.get_all_posts())
-
-
-    app.config['UPLOAD_FOLDER']
-    app.config['UPLOADED_FILES_DEST'] = '/path/to/uploaded/files'
 
     return app
 

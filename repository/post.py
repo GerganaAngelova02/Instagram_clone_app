@@ -3,6 +3,8 @@ from flask import abort
 from entity.post import PostEntity
 from model import db
 from model.post import Post
+from model.comment import Comment
+from model.like import Like
 from mapper.post import map_post_entity_to_post_sql_alchemy, map_post_sql_alchemy_to_post_entity
 
 
@@ -55,6 +57,8 @@ class PostRepository(object):
         if post.author_id != user_id:
             abort(404, "This post can't be deleted")
         self.database.session.delete(post)
+        self.database.session.query(Comment).filter(Comment.post_id == post_id).delete()
+        self.database.session.query(Like).filter(Like.post_id == post_id).delete()
         self.database.session.commit()
         return "Deleted {}".format(map_post_sql_alchemy_to_post_entity(post))
 

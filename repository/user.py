@@ -7,6 +7,8 @@ from mapper.user import map_user_entity_to_user_sql_alchemy, \
 from model import db
 from model.user import User
 from model.post import Post
+from model.comment import Comment
+from model.like import Like
 from flask_login import LoginManager, login_user
 
 
@@ -25,22 +27,6 @@ class UserRepository(object):
         self.database.session.add(user_db_model)
         self.database.session.commit()
         return map_user_sql_alchemy_to_user_entity(user_db_model)
-
-
-    # def get_user_id_by_email(self, email):
-    #     user = self.database.session.query(User).filter(User.email == email).first()
-    #     if user is None:
-    #         abort(404, "User was not found!")
-    #     return user.user_id
-    #
-    # def verify_password(self, user_id, password):
-    #     user = self.database.session.query(User).filter(
-    #         User.user_id == user_id). \
-    #         filter(User.password == password). \
-    #         first()
-    #     if user is None:
-    #         abort(404, "User was not found!")
-    #     return user.username
 
     def log_user(self, email, password):
         user = User.query.filter_by(email=email).first()
@@ -69,6 +55,8 @@ class UserRepository(object):
         if user is None:
             abort(404, "User was not found!")
         self.database.session.query(Post).filter(Post.author_id == user_id).delete()
+        self.database.session.query(Comment).filter(Comment.user_id == user_id).delete()
+        self.database.session.query(Like).filter(Like.user_id == user_id).delete()
         self.database.session.delete(user)
         self.database.session.commit()
         return "Deleted {}".format(map_user_sql_alchemy_to_user_entity(user))

@@ -1,5 +1,5 @@
 from model import db
-from model.post import Post
+
 
 
 class Like(db.Model):
