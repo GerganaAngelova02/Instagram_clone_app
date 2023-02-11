@@ -105,7 +105,8 @@ def create_app():
     @login_required
     def logout():
         logout_user()
-        return Response(json.dumps("You have logged out"), status=HTTPStatus.OK)
+        response = 'You have logged out'
+        return Response(json.dumps(response), status=HTTPStatus.OK)
 
     @app.route('/user', methods=['GET'])
     @login_required
