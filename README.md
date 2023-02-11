@@ -1,4 +1,7 @@
-Uber Summer Practice 2022 Starter project
+#Instagram clone app
+A simple Instagram clone built using the Flask framework. This app allows users to create an account, upload pictures, and like and comment on pictures uploaded by other users.
+
+
 Dockerfiles and set-up instructions for container-based development in different languages.
 
 A simple Python Flask web server, aimed to be a starting point for further development. Comes with a Dockerfile image definition and Docker Compose script for easy dev environment setup.
