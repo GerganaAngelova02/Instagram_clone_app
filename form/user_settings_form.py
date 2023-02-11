@@ -1,4 +1,5 @@
 from wtforms import Form, StringField, SubmitField, validators, PasswordField, EmailField
+from flask_wtf.file import FileField
 
 
 class SettingsForm(Form):
@@ -8,5 +9,5 @@ class SettingsForm(Form):
     full_name = StringField('Full name', [validators.InputRequired(), validators.Length(min=4, max=25)])
     password = PasswordField('Password', [validators.InputRequired()])
     bio = StringField('Bio')
-    profile_pic = StringField('Profile Pic')
+    profile_pic = FileField('Profile Pic')
     submit = SubmitField("Save")

@@ -1,4 +1,7 @@
 import json
+import os
+from io import BytesIO
+
 import pytest
 from http import HTTPStatus
 from tests.test_fixture import client
@@ -79,27 +82,31 @@ def test_settings(client):
     response = client.post('/settings')
     assert response.status_code == 401
 
-    user = user_controller.get_user(13)
+    user = user_controller.get_user(18)
     login_user(user)
 
     form = SettingsForm(prefix='form-settings-')
-    response = client.post(
-        '/settings', data={
-            'username': 'test_user',
-            'email': 'test@gmail.com',
-            'full_name': 'Test',
-            'password': 'pass',
-            'bio': 'hel',
-            'profile_pic': '1234567'
-        })
+    file_path = os.path.join(client.application.root_path, 'content', 'test-image.png')
 
-    response_message = json.loads(response.data)
-    assert response_message == 'Successfully updated profile'
-    assert response.status_code == 200
+    with open(file_path, 'rb') as f:
+        file_contents = f.read()
+        response = client.post(
+            '/settings', data={
+                'username': 'test_user',
+                'email': 'test@gmail.com',
+                'full_name': 'Test',
+                'password': 'pass',
+                'bio': 'hel',
+                'profile_pic': (BytesIO(file_contents), 'test-image.png')
+            })
+
+        response_message = json.loads(response.data)
+        assert response_message == 'Successfully updated profile'
+        assert response.status_code == 200
 
 
 def test_logout(client):
-    response = client.post('/settings')
+    response = client.post('/logout')
     assert response.status_code == 401
 
     user = user_controller.get_user(14)

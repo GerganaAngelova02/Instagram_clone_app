@@ -4,6 +4,8 @@ from flask import Flask, jsonify, render_template, url_for
 import os
 from flask_cors import CORS
 from os.path import join, dirname, realpath
+
+from entity.user import UserEntity
 from mapper.post import map_post_db_model_to_post_entity
 from flask_wtf import CSRFProtect
 from werkzeug.utils import secure_filename
@@ -95,11 +97,24 @@ def create_app():
             return Response(json.dumps(settings_form.errors),
                             status=HTTPStatus.BAD_REQUEST,
                             mimetype='application/json')
-        user = map_user_settings_form_to_user_entity(settings_form)
+
+        allowed_extensions = {'.jpg', '.jpeg', '.png', '.heic', '.heif', '.bmp'}
+        profile_picture = request.files['profile_pic']
+        file_ext = os.path.splitext(profile_picture.filename)[1].lower()
+        if file_ext not in allowed_extensions:
+            error_message = "Invalid file type. Only photo files are allowed."
+            return Response(json.dumps(error_message), status=HTTPStatus.BAD_REQUEST)
+
+        filename = secure_filename(profile_picture.filename)
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        profile_picture.save(file_path)
+        file_url = request.host_url + profile_picture.filename
+        user = map_user_settings_form_to_user_entity(settings_form, file_url)
+
         user.user_id = current_user.user_id
         user_controller.update_user(user)
         response = 'Successfully updated profile'
-        return Response(json.dumps(response),status=HTTPStatus.OK)
+        return Response(json.dumps(response), status=HTTPStatus.OK)
 
     @app.route('/logout')
     @login_required

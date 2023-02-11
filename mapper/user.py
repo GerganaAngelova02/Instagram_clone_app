@@ -19,13 +19,13 @@ def map_user_login_form_to_user_entity(user: LoginForm) -> UserEntity:
                        'password': user.password.data})
 
 
-def map_user_settings_form_to_user_entity(user: SettingsForm) -> UserEntity:
+def map_user_settings_form_to_user_entity(user: SettingsForm, file_path) -> UserEntity:
     return UserEntity({'email': user.email.data,
                        'username': user.username.data,
                        'password': user.password.data,
                        'full_name': user.full_name.data,
                        'bio': user.bio.data,
-                       'profile_pic': user.profile_pic.data})
+                       'profile_pic': file_path})
 
 
 def map_user_db_model_to_user_entity(user: User) -> UserEntity:
