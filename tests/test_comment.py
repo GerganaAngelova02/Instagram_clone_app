@@ -79,13 +79,13 @@ def test_get_comment(client):
 
 
 def test_delete_comment(client):
-    response = client.delete('/post/22/comment/2')
+    response = client.delete('/post/1/comment/1')
     assert response.status_code == 401
 
     user = user_controller.get_user(1)
     login_user(user)
 
-    response = client.delete('/post/22/comment/2')
+    response = client.delete('/post/1/comment/1')
 
     assert response.status_code == 200
 
