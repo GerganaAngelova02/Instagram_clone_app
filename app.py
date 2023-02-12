@@ -150,10 +150,6 @@ def create_app():
                               "posts_count": user_entity.posts_count,
                               "posts": posts})
 
-    @app.route('/users', methods=['GET'])
-    @login_required
-    def get_all_users():
-        return flask.jsonify(user_controller.get_all_users())
 
     @app.route('/user/delete', methods=['DELETE'])
     @login_required

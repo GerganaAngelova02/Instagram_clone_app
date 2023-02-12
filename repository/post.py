@@ -55,7 +55,7 @@ class PostRepository(object):
         if post is None:
             abort(404, "Post was not found!")
         if post.author_id != user_id:
-            abort(404, "This post can't be deleted")
+            abort(404, "This post can not be deleted")
         self.database.session.delete(post)
         self.database.session.query(Comment).filter(Comment.post_id == post_id).delete()
         self.database.session.query(Like).filter(Like.post_id == post_id).delete()

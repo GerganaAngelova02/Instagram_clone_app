@@ -1,6 +1,3 @@
-import tempfile
-
-import requests
 import json
 import pytest
 from http import HTTPStatus
@@ -49,7 +46,7 @@ def test_get_all_posts(client):
             "author_id": 1,
             "caption": "testing",
             "content": "http://localhost/test-image.png",
-            "post_id": 21
+            "post_id": 1
         }
     ]
 
@@ -60,19 +57,19 @@ def test_get_all_posts(client):
 
 
 def test_get_post(client):
-    response = client.get('/post/21')
+    response = client.get('/post/1')
     assert response.status_code == 401
 
     user = user_controller.get_user(1)
     login_user(user)
 
-    response = client.get('/post/21')
+    response = client.get('/post/1')
 
     expected_data = {
         "author_id": 1,
         "caption": "testing",
         "content": "http://localhost/test-image.png",
-        "post_id": 21
+        "post_id": 1
     }
 
     response_data = json.loads(response.data)
@@ -82,7 +79,7 @@ def test_get_post(client):
 
 
 def test_update_post(client):
-    response = client.post('/post/21')
+    response = client.post('/post/1')
     assert response.status_code == 401
 
     user = user_controller.get_user(1)
@@ -90,20 +87,30 @@ def test_update_post(client):
 
     form = PostForm(prefix='form-data-')
 
-    response = client.post('/post/21', data={'caption': 'test'})
+    response = client.post('/post/1', data={'caption': 'test again'})
 
     assert response.status_code == 200
 
 
 def test_delete_post(client):
-    response = client.delete('/post/21')
+    response = client.delete('/post/1')
     assert response.status_code == 401
 
     user = user_controller.get_user(1)
     login_user(user)
 
-    response = client.delete('/post/21')
+    response = client.delete('/post/1')
 
     assert response.status_code == 200
 
 
+def test_delete_post_not_author(client):
+    response = client.delete('/post/1')
+    assert response.status_code == 401
+
+    user = user_controller.get_user(2)
+    login_user(user)
+
+    response = client.delete('/post/1')
+    assert response.status_code == 404
+    assert b'This post can not be deleted' in response.data

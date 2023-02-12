@@ -39,9 +39,11 @@ class LikeRepository(object):
         result = query.all()
 
         likes_count = [{"post_id": post_id, "likes_count": count} for post_id, count in result if post_id == post_id]
-        if likes_count is None:
+        if len(likes_count) == 0:
             abort(404, "Post was not found!")
-        return likes_count[0]
+            return 0
+        else:
+            return likes_count[0]
 
     def likes(self, post_id):
         likes = Like.query.filter_by(post_id=post_id).all()

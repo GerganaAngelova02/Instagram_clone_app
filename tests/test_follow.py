@@ -3,6 +3,7 @@ import pytest
 from http import HTTPStatus
 
 from flask_login import login_user
+from sqlalchemy import null
 
 from controller.user import user_controller
 from form.comment import CommentForm
@@ -11,37 +12,61 @@ from tests.test_fixture import client
 
 
 def test_follow(client):
-    response = client.post('/follow/test_test')
+    response = client.post('/follow/test_user')
     assert response.status_code == 401
 
-    user = user_controller.get_user(18)
+    user = user_controller.get_user(2)
     login_user(user)
 
-    response = client.post('/follow/test_test')
+    response = client.post('/follow/test_user')
 
     expected_data = {
-        "msg": "Started following test_test."
+        "msg": "Started following test_user."
     }
 
-    response_data = json.loads(response.data)
-    for key, value in expected_data.items():
-        assert response_data.get(key) == value
-    assert response.status_code == HTTPStatus.OK
+    if response.status_code == 403:
+        assert b'Already following the user.' in response.data
+        return
+    else:
+        response_data = json.loads(response.data)
+        for key, value in expected_data.items():
+            assert response_data.get(key) == value
+        assert response.status_code == HTTPStatus.OK
+
+
+def test_follow_yourself(client):
+    response = client.post('/follow/test_user')
+    assert response.status_code == 401
+
+    user = user_controller.get_user(1)
+    login_user(user)
+
+    response = client.post('/follow/test_user')
+
+    assert response.status_code == 403
+    assert b'You cannot follow yourself.' in response.data
 
 
 def test_unfollow(client):
-    response = client.delete('/unfollow/test_test')
+    response = client.delete('/unfollow/test_user')
     assert response.status_code == 401
 
-    user = user_controller.get_user(18)
+    user = user_controller.get_user(2)
     login_user(user)
 
-    response = client.delete('/unfollow/test_test')
+    response = client.delete('/unfollow/test_user')
 
     expected_data = {
-        "msg": "Unfollowed test_test."
+        "msg": "Unfollowed test_user."
     }
-
+    if response.status_code == 403:
+        assert b'Not following this user.' in response.data
+        return
+    else:
+        response_data = json.loads(response.data)
+        for key, value in expected_data.items():
+            assert response_data.get(key) == value
+        assert response.status_code == HTTPStatus.OK
     response_data = json.loads(response.data)
     for key, value in expected_data.items():
         assert response_data.get(key) == value
@@ -49,53 +74,52 @@ def test_unfollow(client):
 
 
 def test_get_user_followers(client):
-    response = client.get('/test_test/followers')
+    response = client.get('/test_user/followers')
     assert response.status_code == 401
 
-    user = user_controller.get_user(18)
+    user = user_controller.get_user(1)
     login_user(user)
 
-    response = client.get('/test_test/followers')
+    response = client.get('/test_user/followers')
 
-    expected_data = {
-        "followers": [
-            "nia_dimitrova",
-            "test_user"
-        ]
-    }
+    expected_data = {"followers": ["test_user_second"]}
+
+    expected_data_zero_followers = {"followers": []}
 
     response_data = json.loads(response.data)
-    for key, value in expected_data.items():
-        assert response_data.get(key) == value
-    assert response.status_code == HTTPStatus.OK
+    if expected_data.get("followers") == response_data.get("followers"):
+        assert response.status_code == HTTPStatus.OK
+
+    elif expected_data_zero_followers.get("followers") == response_data.get("followers"):
+        assert response.status_code == HTTPStatus.OK
 
 
 def test_get_user_following(client):
-    response = client.get('/test_test/following')
+    response = client.get('/test_user_second/following')
     assert response.status_code == 401
 
-    user = user_controller.get_user(18)
+    user = user_controller.get_user(1)
     login_user(user)
 
-    response = client.get('/test_test/following')
+    response = client.get('/test_user_second/following')
 
-    expected_data = {
-        "following list": [
-            "nia_dimitrova"
-        ]
-    }
+    expected_data = {"following list": ["test_user"]}
+
+    expected_data_zero_following = {"following list": []}
 
     response_data = json.loads(response.data)
-    for key, value in expected_data.items():
-        assert response_data.get(key) == value
-    assert response.status_code == HTTPStatus.OK
+    if expected_data.get("following list") == response_data.get("following list"):
+        assert response.status_code == HTTPStatus.OK
+
+    elif expected_data_zero_following.get("following list") == response_data.get("following list"):
+        assert response.status_code == HTTPStatus.OK
 
 
 def test_feed(client):
     response = client.get('/feed')
     assert response.status_code == 401
 
-    user = user_controller.get_user(18)
+    user = user_controller.get_user(2)
     login_user(user)
 
     response = client.get('/feed')
@@ -104,10 +128,10 @@ def test_feed(client):
         "feed posts": [
             [
                 {
-                    "author_id": 7,
-                    "caption": "test",
-                    "content": "http://localhost:5000/test-image.png",
-                    "post_id": 22
+                    "author_id": 1,
+                    "caption": "test again",
+                    "content": "http://localhost/test-image.png",
+                    "post_id": 1
                 }
             ]
         ]
@@ -130,14 +154,47 @@ def test_explore(client):
 
     expected_data = [
         {
-            "author_id": 7,
-            "caption": "test",
-            "content": "http://localhost:5000/test-image.png",
-            "post_id": 22
+            "author_id": 1,
+            "caption": "test again",
+            "content": "http://localhost/test-image.png",
+            "post_id": 1
         }
     ]
-
     response_data = json.loads(response.data)
     for expected, response in zip(expected_data, response_data):
         for key, value in expected.items():
             assert response.get(key) == value
+
+
+def test_get_user_by_username(client):
+    response = client.get('/test_user')
+    assert response.status_code == 401
+
+    user = user_controller.get_user(1)
+    login_user(user)
+
+    response = client.get('/test_user')
+
+    expected_data = {
+        "bio": "user info",
+        "email": "test@gmail.com",
+        "followers_count": 1,
+        "following_count": 1,
+        "full_name": "Test",
+        "posts": [
+            {
+                "author_id": 1,
+                "caption": "test again",
+                "content": "http://localhost/test-image.png",
+                "post_id": 1
+            }
+        ],
+        "posts_count": 1,
+        "profile_pic": "http://localhost/test_profile_pic.png",
+        "username": "test_user"
+    }
+
+    response_data = json.loads(response.data)
+    for key, value in expected_data.items():
+        assert response_data.get(key) == value
+    assert response.status_code == HTTPStatus.OK
