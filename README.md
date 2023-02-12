@@ -1,6 +1,8 @@
 # Instagram clone app :camera:
 A simple Instagram clone built using the Flask framework. This app allows users to create an account, upload pictures, and like and comment on photos,follow and unfollow other users.
 
+![GerriGram](https://user-images.githubusercontent.com/104621517/218286486-98796454-6efd-426c-82e5-2716c9988d6a.png)
+
 ## Features :sparkles:
 * User authentication and authorization.
 * User account settings.
