@@ -1,32 +1,54 @@
-Uber Summer Practice 2022 Starter project
-Dockerfiles and set-up instructions for container-based development in different languages.
+# Instagram clone app :camera:
+A simple Instagram clone built using the Flask framework. This app allows users to create an account, upload pictures, and like and comment on photos,follow and unfollow other users.
 
-A simple Python Flask web server, aimed to be a starting point for further development. Comes with a Dockerfile image definition and Docker Compose script for easy dev environment setup.
+## Features :sparkles:
+* User authentication and authorization.
+* User account settings.
+* Picture uploads.:framed_picture:
+* Displaying uploaded images on the user's profile feed page.
+* Explore page. :compass:
+* Ability to like :heart: and comment :left_speech_bubble: on images, see likes count, and list users who have commented on a single post.
+* User profile pages with the ability to follow and unfollow other users, and see the number of posts, followers, and following accounts.
 
-Description
-This is a Docker-based environment containing a simple Python Flask application. It is aimed at easy and quick onboarding to development within a Docker container. This allows for unified dependency management across different team members, and overall quick set up when starting a new project.
+## Prerequisites :scroll:
+* Docker
+* Docker Compose
+* Postman 
 
-The idea is that the Docker image can be used in development and afterwards deployment on AWS or similar cloud provider. The Docker Compose file spawns a hot-reloading environment, where the ports used by each container are being exposed on the host machine.
+## Description 
+Docker is a containerization technology that allows developers to package their applications and dependencies into containers. These containers can then be run on any machine that has Docker installed, making it easy to develop and test applications on different environments.
 
-The web server runs at port 8080. It overrides the default Flask port 5000, because Apple is now using it in the latest macOS version.
+In this project, we are using Docker to isolate our application and its dependencies from the host system. This ensures that the application runs consistently, regardless of the host system's configuration.
 
-Getting Started
-Before starting please get familiar with what Docker and Docker Compose are.
+## Getting Started :sparkles:
+Make sure [Docker](https://www.docker.com/products/docker-desktop/) is installed.
+Get familiar with what [Docker](https://docs.docker.com/get-started/overview/) and [Docker Compose](https://docs.docker.com/compose/).\
+After installing Docker, clone this repo and in the main folder execute the following commands:
 
-This is also a good overview of pros and cons when using Docker Compose for local development.
+## Docker Commands :round_pushpin:
 
-Dependencies
-Docker
-Port 8080 being available on host machine (your laptop)
-Usage
-After installing Docker, clone this repo and in the main folder run:
+### Start Docker
+```
+docker-compose up 
+```
 
-docker compose up -d
-Note: If you are having troubles with docker compose try docker-compose instead.
+### Remove Docker Containers(does not remove database)
+```
+docker-compose down
+```
 
-This will spawn the running container in the background. When you then make changes to the code in the folder you will see the changes being reflected at localhost:8080.
+###  Remove Docker Containers and the Databases
+```
+docker-compose down -v
+```
 
-To de-spawn the environment and remove the running containers execute:
+## Database Setup
 
-docker compose down
-Again, if there are issues with docker compose try docker-compose.
+Run `db_setup.py` once to create all tables.\
+View the records in database on [phpMyAdmin](http://localhost:8090/) \
+**Note:** the link is available only if the docker container is running.
+
+## Testing :heavy_check_mark:
+* Running the tests. Each test makes an HTTP request to the server and the changes from the response can be seen in the database.
+* Another way for testing is to send requests through Postman. 
+
